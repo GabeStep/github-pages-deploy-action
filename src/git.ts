@@ -1,24 +1,13 @@
 import * as core from "@actions/core";
-import * as github from "@actions/github";
 import {cp, rmRF} from "@actions/io"
 import { execute } from "./util";
-import { workspace, build } from './constants';
+import { workspace, build, action } from './constants';
 
 const { pusher, repository } = github.context.payload;
   
-    // Returns for testing purposes.
-    const action = {
-      gitHubRepository: repository ? repository.full_name : "",
-      gitHubToken: core.getInput("GITHUB_TOKEN"),
-      cname: core.getInput("CNAME"),
-      accessToken: core.getInput("ACCESS_TOKEN"),
-      branch: core.getInput("BRANCH"),
-      baseBranch: core.getInput("BASE_BRANCH"),
-    }
 
 export async function init() {
   try {
-    const { pusher, repository } = github.context.payload;
 
     const accessToken = core.getInput("ACCESS_TOKEN");
     const gitHubToken = core.getInput("GITHUB_TOKEN");
@@ -39,16 +28,7 @@ export async function init() {
     await execute(`git init`, workspace);
     await execute(`git config user.name ${pusher.name}`, workspace);
     await execute(`git config user.email ${pusher.email}`, workspace);
-  
-    // Returns for testing purposes.
-    return {
-      gitHubRepository: repository ? repository.full_name : "",
-      gitHubToken: core.getInput("GITHUB_TOKEN"),
-      cname: core.getInput("CNAME"),
-      accessToken: core.getInput("ACCESS_TOKEN"),
-      branch: core.getInput("BRANCH"),
-      baseBranch: core.getInput("BASE_BRANCH"),
-    }
+
   } catch (error) {
     core.setFailed(`There was an error initializing the repository: ${error}`)
   }
