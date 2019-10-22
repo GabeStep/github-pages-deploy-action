@@ -17,7 +17,7 @@ export async function execute(cmd: string, cwd: string): Promise<String> {
   });
 
   if (myError) {
-    throw new Error(myError);
+    //throw new Error(myError);
   }
   return myOutput;
 }
