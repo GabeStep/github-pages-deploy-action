@@ -73,8 +73,7 @@ export async function deploy() {
 
     await execute(`git fetch origin`, workspace);
     await execute(`git worktree add --checkout ${temporaryDeploymentDirectory} origin/${action.branch}`, workspace);
-
-    await cp(`${build}/*`, temporaryDeploymentDirectory, {recursive: true, force: true})
+    await execute(`cp -rf ${build}/* ${temporaryDeploymentDirectory}`, workspace)
 
     await execute(`git add --all`, temporaryDeploymentDirectory)
     await execute(`git checkout -b ${temporaryDeploymentBranch}`, temporaryDeploymentDirectory);
