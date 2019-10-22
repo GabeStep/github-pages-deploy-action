@@ -95,8 +95,6 @@ export async function deploy() {
   
     console.log('Preparing for deployment....')
     await execute(`git fetch origin`, workspace)
-    await rmRF(temporaryDeploymentDirectory)
-    await execute(`rm -rf ${temporaryDeploymentDirectory}`, workspace)
     await execute(`git worktree add --checkout ${temporaryDeploymentDirectory} origin/${action.branch}`, workspace)
     await cp(`${build}/*`, temporaryDeploymentDirectory, {recursive: true, force: true})
   

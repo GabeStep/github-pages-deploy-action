@@ -2,17 +2,22 @@ import { exec } from "@actions/exec";
 import { rejects } from "assert";
 
 export async function execute(cmd: string, cwd: string): Promise<String> {
-  return new Promise(async (resolve, reject) => {
-    await exec(cmd, [], {
-      cwd, 
-      listeners: {
-        stdout: (data: Buffer) => {
-          resolve(data.toString().trim());
-        },
-        stderr: (data: Buffer) => {
-          reject(data.toString().trim());
-        }
+  let myOutput = '';
+  let myError = '';
+  await exec(cmd, [], {
+    cwd,
+    listeners: {
+      stdout: (data: Buffer) => {
+        myOutput += data.toString().trim();
+      },
+      stderr: (data: Buffer) => {
+        myError += data.toString().trim();
       }
-    });
+    }
   });
+
+  if (myError) {
+    throw new Error(myError);
+  }
+  return myOutput;
 }
