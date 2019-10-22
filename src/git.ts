@@ -47,7 +47,6 @@ export async function generateBranch(action, repositoryPath) {
 }
 
 export async function deploy() {
-  try {
     const temporaryDeploymentDirectory = 'tmp-deployment-folder';
     const temporaryDeploymentBranch = 'tmp-deployment-branch';
   
@@ -60,7 +59,7 @@ export async function deploy() {
   
     if (!branchExists) {
       console.log('Deployment branch does not exist. Creating....')
-      await generateBranch(action, repositoryPath);
+      //await generateBranch(action, repositoryPath);
     }
   
     console.log('Checking out...')
@@ -74,9 +73,4 @@ export async function deploy() {
     await execute(`git add -f ${build}`, workspace)
     await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch || 'master'} ${process.env.GITHUB_SHA}"`, workspace)
     await execute(`git push ${repositoryPath} \`git subtree split --prefix ${build} ${action.baseBranch || 'master'}\`:${action.branch} --force`, workspace)
-  } catch(error) {
-    core.setFailed(`There was an error in the deployment: ${error}`)
-  } finally {
-    console.log('Deployment succeeded')
-  }
 }
