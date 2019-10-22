@@ -1,10 +1,7 @@
 import * as core from "@actions/core";
 import {cp, rmRF} from "@actions/io"
 import { execute } from "./util";
-import { workspace, build, action } from './constants';
-
-const { pusher, repository } = github.context.payload;
-  
+import { workspace, build, action, repositoryPath } from './constants';
 
 export async function init() {
   try {
@@ -26,15 +23,15 @@ export async function init() {
   
     console.log('Starting repo init...')
     await execute(`git init`, workspace);
-    await execute(`git config user.name ${pusher.name}`, workspace);
-    await execute(`git config user.email ${pusher.email}`, workspace);
+    await execute(`git config user.name ${action.pusher.name}`, workspace);
+    await execute(`git config user.email ${action.pusher.email}`, workspace);
 
   } catch (error) {
     core.setFailed(`There was an error initializing the repository: ${error}`)
   }
 }
 
-export async function generateBranch(action, repositoryPath) {
+export async function generateBranch() {
   try {
     await execute(`git checkout ${action.baseBranch || "master"}`, workspace);
     await execute(`git checkout --orphan ${action.branch}`, workspace);
@@ -53,16 +50,12 @@ export async function deploy() {
     const temporaryDeploymentDirectory = 'tmp-deployment-folder';
     const temporaryDeploymentBranch = 'tmp-deployment-branch';
   
-    const repositoryPath = `https://${action.accessToken ||
-      `x-access-token:${action.gitHubToken}`}@github.com/${
-      action.gitHubRepository
-    }.git`;
   
     const branchExists = Number(await execute(`git ls-remote --heads ${repositoryPath} ${action.branch} | wc -l`, workspace));
   
     if (!branchExists) {
       console.log('Deployment branch does not exist. Creating....')
-      await generateBranch(action, repositoryPath);
+      await generateBranch();
     }
   
     console.log('Checking out...')
