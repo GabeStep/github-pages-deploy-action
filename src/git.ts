@@ -1,5 +1,4 @@
 import * as core from "@actions/core";
-import {cp, rmRF} from "@actions/io"
 import { execute } from "./util";
 import { workspace, build, action, repositoryPath } from './constants';
 
@@ -31,12 +30,14 @@ export async function init() {
   }
 }
 
-export async function generateBranch() {
+export async function generateBranch(action, repositoryPath) {
   try {
     await execute(`git checkout ${action.baseBranch || "master"}`, workspace);
     await execute(`git checkout --orphan ${action.branch}`, workspace);
-    await execute(`git reset --hard`, workspace)
-    await execute(`git commit --allow-empty -m "Initial ${action.branch} branch creation"`, workspace)
+    await execute(`git rm -rf .`, workspace)
+    await execute(`touch README.md`, workspace)
+    await execute(`git add README.md`, workspace)
+    await execute(`git commit -m "Initial ${action.branch} commit"`, workspace)
     await execute(`git push ${repositoryPath} ${action.branch}`, workspace)
   } catch (error) {
     core.setFailed(`There was an error creating the deployment branch: ${error}`);
@@ -50,12 +51,16 @@ export async function deploy() {
     const temporaryDeploymentDirectory = 'tmp-deployment-folder';
     const temporaryDeploymentBranch = 'tmp-deployment-branch';
   
+    const repositoryPath = `https://${action.accessToken ||
+      `x-access-token:${action.gitHubToken}`}@github.com/${
+      action.gitHubRepository
+    }.git`;
   
     const branchExists = Number(await execute(`git ls-remote --heads ${repositoryPath} ${action.branch} | wc -l`, workspace));
   
     if (!branchExists) {
       console.log('Deployment branch does not exist. Creating....')
-      await generateBranch();
+      await generateBranch(action, repositoryPath);
     }
   
     console.log('Checking out...')
@@ -65,19 +70,10 @@ export async function deploy() {
       console.log(`Generating a CNAME file in the ${build} directory...`);
       await execute(`echo ${action.cname} > CNAME`, build);
     }
-  
-    console.log('Preparing for deployment....')
-    await execute(`git fetch origin`, workspace)
-    await execute(`git worktree add --checkout ${temporaryDeploymentDirectory} origin/${action.branch}`, workspace)
-    await cp(`${build}/*`, temporaryDeploymentDirectory, {recursive: true, force: true})
-  
-    console.log('Preparing Git Commit...')
-    await execute(`git add --all .`, temporaryDeploymentDirectory)
-    await execute(`git checkout -b ${temporaryDeploymentBranch}`, temporaryDeploymentDirectory)
-    await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch || 'master'} ${process.env.GITHUB_SHA}"`, temporaryDeploymentDirectory)
-    
-    console.log('Executing push to GitHub')
-    await execute(`git push ${repositoryPath} ${temporaryDeploymentBranch}:${action.branch}`, temporaryDeploymentDirectory)
+
+    await execute(`git add -f ${build}`, workspace)
+    await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch || 'master'} ${process.env.GITHUB_SHA}"`, workspace)
+    await execute(`git push ${repositoryPath} \`git subtree split --prefix ${build} ${action.baseBranch || 'master'}\`:${action.branch} --force`, workspace)
   } catch(error) {
     core.setFailed(`There was an error in the deployment: ${error}`)
   } finally {
