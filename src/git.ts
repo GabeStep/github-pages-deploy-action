@@ -48,8 +48,8 @@ export async function generateBranch(action, repositoryPath) {
 }
 
 export async function deploy() {
-    const temporaryDeploymentDirectory = 'tmp-deployment-folder';
-    const temporaryDeploymentBranch = 'tmp-deployment-branch';
+    //const temporaryDeploymentDirectory = 'tmp-deployment-folder';
+    //const temporaryDeploymentBranch = 'tmp-deployment-branch';
   
     const repositoryPath = `https://${action.accessToken ||
       `x-access-token:${action.gitHubToken}`}@github.com/${
@@ -71,12 +71,16 @@ export async function deploy() {
       await execute(`echo ${action.cname} > CNAME`, build);
     }
 
-    await execute(`git fetch origin`, workspace);
+    await execute(`git add -f ${build}`, workspace)
+    await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA}`, workspace);
+    await execute(`git push $REPOSITORY_PATH ${'`'}git subtree split --prefix $FOLDER ${action.baseBranch || 'master'}${'`'}:${action.branch} --force`, workspace)
+
+    /*await execute(`git fetch origin`, workspace);
     await execute(`git worktree add --checkout ${temporaryDeploymentDirectory} origin/${action.branch}`, workspace);
     await cp(build, temporaryDeploymentDirectory, {recursive: true, force: true})
 
     await execute(`git add --all .`, temporaryDeploymentDirectory)
     await execute(`git checkout -b ${temporaryDeploymentBranch}`, temporaryDeploymentDirectory);
     await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA}`, temporaryDeploymentDirectory);
-    await execute(`git push ${repositoryPath} ${temporaryDeploymentBranch}:${action.branch}`, temporaryDeploymentDirectory)
+    await execute(`git push ${repositoryPath} ${temporaryDeploymentBranch}:${action.branch}`, temporaryDeploymentDirectory)*/
 }
