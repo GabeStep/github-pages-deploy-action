@@ -73,7 +73,7 @@ export async function deploy() {
 
     await execute(`git add -f ${build}`, workspace)
     await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA}`, workspace);
-    await execute(`git push $REPOSITORY_PATH ${'`'}git subtree split --prefix $FOLDER ${action.baseBranch || 'master'}${'`'}:${action.branch} --force`, workspace)
+    await execute(`git push ${repositoryPath} ${'`'}git subtree split --prefix ${build} ${action.baseBranch || 'master'}${'`'}:${action.branch} --force`, workspace)
 
     /*await execute(`git fetch origin`, workspace);
     await execute(`git worktree add --checkout ${temporaryDeploymentDirectory} origin/${action.branch}`, workspace);
