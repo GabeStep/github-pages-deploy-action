@@ -78,10 +78,11 @@ export async function deploy() {
     await execute(`git fetch origin`, workspace);
     await execute(`git worktree add --checkout ${temporaryDeploymentDirectory} origin/${action.branch}`, workspace);
     await cp(build, temporaryDeploymentDirectory, {recursive: true, force: true})
-
+    console.log(await execute(`ls`, temporaryDeploymentDirectory))
     await execute(`git add --all .`, temporaryDeploymentDirectory)
+
     await execute(`git checkout -b ${temporaryDeploymentBranch}`, temporaryDeploymentDirectory);
-    await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA}`, temporaryDeploymentDirectory);
     await execute(`git status`, workspace)
+    await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA}`, temporaryDeploymentDirectory);
     await execute(`git push ${repositoryPath} ${temporaryDeploymentBranch}:${action.branch}`, temporaryDeploymentDirectory)
 }
