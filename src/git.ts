@@ -48,8 +48,8 @@ export async function generateBranch(action, repositoryPath) {
 }
 
 export async function deploy() {
-    const temporaryDeploymentDirectory = 'tmp-deployment-folder';
-    const temporaryDeploymentBranch = 'tmp-deployment-branch';
+    //const temporaryDeploymentDirectory = 'tmp-deployment-folder';
+    //const temporaryDeploymentBranch = 'tmp-deployment-branch';
   
     const repositoryPath = `https://${action.accessToken ||
       `x-access-token:${action.gitHubToken}`}@github.com/${
