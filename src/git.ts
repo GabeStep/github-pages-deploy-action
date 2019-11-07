@@ -70,7 +70,7 @@ export async function deploy() {
 
     if (action.cname) {
       console.log(`Generating a CNAME file in the ${build} directory...`);
-      await execute(`echo "${action.cname}" > CNAME`, build);
+      await execute(`echo "${action.cname}" > ${build}/CNAME`, workspace);
     }
 
     await cp(`${build}/.`, temporaryDeploymentDirectory, {recursive: true, force: true});
