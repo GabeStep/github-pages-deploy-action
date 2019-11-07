@@ -50,12 +50,6 @@ export async function generateBranch(action, repositoryPath) {
 export async function deploy() {
     const temporaryDeploymentDirectory = 'tmp-deployment-folder';
     const temporaryDeploymentBranch = 'tmp-deployment-branch';
-  
-    const repositoryPath = `https://${action.accessToken ||
-      `x-access-token:${action.gitHubToken}`}@github.com/${
-      action.gitHubRepository
-    }.git`;
-  
     const branchExists = Number(await execute(`git ls-remote --heads ${repositoryPath} ${action.branch} | wc -l`, workspace));
   
     if (!branchExists) {
@@ -68,7 +62,7 @@ export async function deploy() {
   
     if (action.cname) {
       console.log(`Generating a CNAME file in the ${build} directory...`);
-      await execute(`echo ${action.cname} > CNAME`, build);
+      await execute(`echo "${action.cname}" > CNAME`, build);
     }
 
     /*await execute(`git add -f ${build}`, workspace)
@@ -77,12 +71,13 @@ export async function deploy() {
 
     await execute(`git fetch origin`, workspace);
     await execute(`git worktree add --checkout ${temporaryDeploymentDirectory} origin/${action.branch}`, workspace);
-    await execute(`cp -rf ${build}/. ${temporaryDeploymentDirectory}`, workspace)
-    console.log(await execute(`ls`, temporaryDeploymentDirectory))
+    await cp(`${build}/.`, temporaryDeploymentDirectory, {recursive: true, force: true});
+    //await execute(`cp -rf ${build}/. ${temporaryDeploymentDirectory}`, workspace)
+    //console.log(await execute(`ls`, temporaryDeploymentDirectory))
     await execute(`git add --all .`, temporaryDeploymentDirectory)
 
     await execute(`git checkout -b ${temporaryDeploymentBranch}`, temporaryDeploymentDirectory);
     await execute(`git status`, workspace)
-    await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA}`, temporaryDeploymentDirectory);
+    await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA} --quiet`, temporaryDeploymentDirectory);
     await execute(`git push ${repositoryPath} ${temporaryDeploymentBranch}:${action.branch}`, temporaryDeploymentDirectory)
 }
