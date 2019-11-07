@@ -35,10 +35,8 @@ export async function generateBranch(action, repositoryPath) {
   try {
     await execute(`git checkout ${action.baseBranch || "master"}`, workspace);
     await execute(`git checkout --orphan ${action.branch}`, workspace);
-    await execute(`git rm -rf .`, workspace)
-    await execute(`touch README.md`, workspace)
-    await execute(`git add README.md`, workspace)
-    await execute(`git commit -m "Initial ${action.branch} commit"`, workspace)
+    await execute(`git reset --hard`, workspace)
+    await execute(`git commit --allow-empty -m "Initial ${action.branch} commit."`, workspace)
     await execute(`git push ${repositoryPath} ${action.branch}`, workspace)
   } catch (error) {
     core.setFailed(`There was an error creating the deployment branch: ${error}`);
@@ -54,10 +52,9 @@ export async function deploy() {
   
     if (!branchExists) {
       console.log('Deployment branch does not exist. Creating....')
-      //await generateBranch(action, repositoryPath);
+      await generateBranch(action, repositoryPath);
     }
   
-    console.log('Checking out...')
     await execute(`git checkout ${action.baseBranch || 'master'}`, workspace)
     await execute(`git fetch origin`, workspace);
     await execute(`git worktree add --checkout ${temporaryDeploymentDirectory} origin/${action.branch}`, workspace);
