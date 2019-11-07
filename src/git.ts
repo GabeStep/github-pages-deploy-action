@@ -3,7 +3,10 @@ import {cp} from "@actions/io"
 import { execute } from "./util";
 import { workspace, build, action, repositoryPath } from './constants';
 
-export async function init() {
+/** Generates the branch if it doesn't exist on the remote.
+ * @returns {Promise}
+ */
+export async function init(): Promise<any>  {
   try {
     const accessToken = core.getInput("ACCESS_TOKEN");
     const gitHubToken = core.getInput("GITHUB_TOKEN");
@@ -26,12 +29,16 @@ export async function init() {
 
   } catch (error) {
     core.setFailed(`There was an error initializing the repository: ${error}`)
+  } finally {
+    return Promise.resolve()
   }
 }
 
-export async function generateBranch() {
+/** Generates the branch if it doesn't exist on the remote.
+ * @returns {Promise}
+ */
+export async function generateBranch(): Promise<any> {
   try {
-    // Creates a new branch if it doesn't exist on the remote.
     console.log(`Creating ${action.branch} branch...`)
     await execute(`git checkout ${action.baseBranch || "master"}`, workspace);
     await execute(`git checkout --orphan ${action.branch}`, workspace);
@@ -42,10 +49,15 @@ export async function generateBranch() {
     core.setFailed(`There was an error creating the deployment branch: ${error}`);
   } finally {
     console.log("Deployment branch successfully created!");
+
+    return Promise.resolve()
   }
 }
 
-export async function deploy() {
+/** Runs the neccersary steps to make the deployment.
+ * @returns {Promise}
+ */
+export async function deploy(): Promise<any> {
     const temporaryDeploymentDirectory = 'temp-deployment-folder';
     const temporaryDeploymentBranch = 'temp-deployment-branch';
 
@@ -74,4 +86,6 @@ export async function deploy() {
     await execute(`git checkout -b ${temporaryDeploymentBranch}`, temporaryDeploymentDirectory);
     await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA}" --quiet`, temporaryDeploymentDirectory);
     await execute(`git push ${repositoryPath} ${temporaryDeploymentBranch}:${action.branch}`, temporaryDeploymentDirectory)
+
+    return Promise.resolve()
 }
