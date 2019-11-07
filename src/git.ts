@@ -27,6 +27,8 @@ export async function init() {
 
   } catch (error) {
     core.setFailed(`There was an error initializing the repository: ${error}`)
+  } finally {
+    Promise.resolve("Initializion Step Complete...")
   }
 }
 
@@ -42,7 +44,7 @@ export async function generateBranch() {
   } catch (error) {
     core.setFailed(`There was an error creating the deployment branch: ${error}`);
   } finally {
-    console.log("Deployment branch successfully created!");
+    Promise.resolve("Deployment branch creation step complete...");
   }
 }
 
@@ -69,11 +71,13 @@ export async function deploy(): Promise<any> {
     /*
       Pushes all of the build files into the deployment directory.
       Allows the user to specify the root if '.' is provided. */
-    await cp(build === '.' ? build : `${build}/.`, temporaryDeploymentDirectory, {recursive: true, force: true});
+    await cp(`${build}/.`, temporaryDeploymentDirectory, {recursive: true, force: true});
 
     // Commits to GitHub.
     await execute(`git add --all .`, temporaryDeploymentDirectory)
     await execute(`git checkout -b ${temporaryDeploymentBranch}`, temporaryDeploymentDirectory);
     await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA}" --quiet`, temporaryDeploymentDirectory);
     await execute(`git push ${repositoryPath} ${temporaryDeploymentBranch}:${action.branch}`, temporaryDeploymentDirectory)
+
+    return Promise.resolve('Files commit step complete...')
 }
