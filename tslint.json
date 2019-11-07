@@ -14,7 +14,7 @@
     "no-duplicate-variable": [true, "check-parameters"],
     "no-shadowed-variable": true,
     "no-empty": [true, "allow-empty-catch"],
-    "no-floating-promises": true,
+    "no-floating-promises": false,
     "no-implicit-dependencies": true,
     "no-invalid-this": true,
     "no-string-throw": true,

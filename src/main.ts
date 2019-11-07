@@ -1,9 +1,7 @@
-import * as core from "@actions/core";
-import { init, deploy } from "./git";
+import * as core from '@actions/core';
+import {init, deploy} from './git';
 
-/** Initializes and runs the action.
- * @returns {Promise}
- */
+/** Initializes and runs the action. */
 (async function() {
   try {
     // Initializes the action.
@@ -12,6 +10,6 @@ import { init, deploy } from "./git";
   } catch (error) {
     core.setFailed(error.message);
   } finally {
-    console.log("Deployment Successful!");
+    console.log('Completed Deployment');
   }
-})()
+})();
