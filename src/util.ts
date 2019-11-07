@@ -6,7 +6,7 @@ import { exec } from "@actions/exec";
  * @param {String} cwd - The current working directory.
  * @returns {String} - The output from the command.
  */
-export async function execute(cmd: string, cwd: string): Promise<String> {
+export async function execute(cmd: string, cwd: string) {
   let output = '';
 
   await exec(cmd, [], {
@@ -18,5 +18,5 @@ export async function execute(cmd: string, cwd: string): Promise<String> {
     }
   });
 
-  return Promise.resolve(output);
+  return output;
 }
