@@ -4,6 +4,7 @@ import { rejects } from "assert";
 export async function execute(cmd: string, cwd: string): Promise<String> {
   let myOutput = '';
   let myError = '';
+
   await exec(cmd, [], {
     cwd,
     listeners: {
