@@ -33,6 +33,7 @@ export async function init() {
 
 export async function generateBranch(action, repositoryPath) {
   try {
+    console.log(`Creating ${action.branch} branch...`)
     await execute(`git checkout ${action.baseBranch || "master"}`, workspace);
     await execute(`git checkout --orphan ${action.branch}`, workspace);
     await execute(`git reset --hard`, workspace)
@@ -61,7 +62,7 @@ export async function deploy() {
 
     if (action.cname) {
       console.log(`Generating a CNAME file in the ${build} directory...`);
-      await execute(`printf > CNAME`, build);
+      await execute(`printf ${action.cname} > CNAME`, build);
     }
 
     await cp(`${build}/.`, temporaryDeploymentDirectory, {recursive: true, force: true});
@@ -69,6 +70,6 @@ export async function deploy() {
 
     await execute(`git checkout -b ${temporaryDeploymentBranch}`, temporaryDeploymentDirectory);
     await execute(`git status`, workspace)
-    await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA} --quiet`, temporaryDeploymentDirectory);
+    await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA}" --quiet`, temporaryDeploymentDirectory);
     await execute(`git push ${repositoryPath} ${temporaryDeploymentBranch}:${action.branch}`, temporaryDeploymentDirectory)
 }
