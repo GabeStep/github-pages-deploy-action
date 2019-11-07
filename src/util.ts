@@ -4,9 +4,9 @@ import { exec } from "@actions/exec";
  * Also allows you to easily toggle the current working directory.
  * @param {String} cmd = The command to execute.
  * @param {String} cwd - The current working directory.
- * @returns {String} - The output from the command.
+ * @returns {Promise} - The output from the command.
  */
-export async function execute(cmd: string, cwd: string) {
+export async function execute(cmd: string, cwd: string): Promise<any> {
   let output = '';
 
   await exec(cmd, [], {
@@ -18,5 +18,5 @@ export async function execute(cmd: string, cwd: string) {
     }
   });
 
-  return output;
+  return Promise.resolve(output);
 }

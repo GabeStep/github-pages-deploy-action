@@ -2,9 +2,9 @@ import * as core from "@actions/core";
 import { init, deploy } from "./git";
 
 /** Initializes and runs the action.
- * @returns {undefined}
+ * @returns {Promise}
  */
-(async function() {
+async function run (): Promise<any> {
   try {
     // Initializes the action.
     await init();
@@ -12,6 +12,8 @@ import { init, deploy } from "./git";
   } catch (error) {
     core.setFailed(error.message);
   } finally {
-    console.log("Deployment Successful!");
+    Promise.resolve("Deployment Successful!");
   }
-})
+}
+
+run()
