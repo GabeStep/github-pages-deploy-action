@@ -59,24 +59,15 @@ export async function deploy() {
   
     console.log('Checking out...')
     await execute(`git checkout ${action.baseBranch || 'master'}`, workspace)
-
-
-    /*await execute(`git add -f ${build}`, workspace)
-    await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA}`, workspace);
-    await execute(`git push ${repositoryPath} \`git subtree split --prefix ${build} ${action.baseBranch || 'master'}\`:${action.branch} --force`, workspace)*/
-
     await execute(`git fetch origin`, workspace);
     await execute(`git worktree add --checkout ${temporaryDeploymentDirectory} origin/${action.branch}`, workspace);
 
     if (action.cname) {
       console.log(`Generating a CNAME file in the ${build} directory...`);
-      await execute(`touch CNAME`, build);
-      await execute(`printf ${action.cname} > CNAME`, build)
+      await execute(`printf > CNAME`, build);
     }
 
     await cp(`${build}/.`, temporaryDeploymentDirectory, {recursive: true, force: true});
-    //await execute(`cp -rf ${build}/. ${temporaryDeploymentDirectory}`, workspace)
-    //console.log(await execute(`ls`, temporaryDeploymentDirectory))
     await execute(`git add --all .`, temporaryDeploymentDirectory)
 
     await execute(`git checkout -b ${temporaryDeploymentBranch}`, temporaryDeploymentDirectory);
