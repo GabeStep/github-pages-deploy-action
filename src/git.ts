@@ -59,11 +59,7 @@ export async function deploy() {
   
     console.log('Checking out...')
     await execute(`git checkout ${action.baseBranch || 'master'}`, workspace)
-  
-    if (action.cname) {
-      console.log(`Generating a CNAME file in the ${build} directory...`);
-      await execute(`echo "${action.cname}" > CNAME`, build);
-    }
+
 
     /*await execute(`git add -f ${build}`, workspace)
     await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA}`, workspace);
@@ -71,6 +67,12 @@ export async function deploy() {
 
     await execute(`git fetch origin`, workspace);
     await execute(`git worktree add --checkout ${temporaryDeploymentDirectory} origin/${action.branch}`, workspace);
+
+    if (action.cname) {
+      console.log(`Generating a CNAME file in the ${build} directory...`);
+      await execute(`echo "${action.cname}" > CNAME`, build);
+    }
+
     await cp(`${build}/.`, temporaryDeploymentDirectory, {recursive: true, force: true});
     //await execute(`cp -rf ${build}/. ${temporaryDeploymentDirectory}`, workspace)
     //console.log(await execute(`ls`, temporaryDeploymentDirectory))
