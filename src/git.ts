@@ -49,7 +49,7 @@ export async function generateBranch(action, repositoryPath) {
 export async function deploy() {
     const temporaryDeploymentDirectory = 'tmp-deployment-folder';
     const temporaryDeploymentBranch = 'tmp-deployment-branch';
-    const branchExists = Number(await execute(`git ls-remote --heads ${repositoryPath} ${action.branch} | wc -l`, workspace));
+    const branchExists = await execute(`git ls-remote --heads ${repositoryPath} ${action.branch} | wc -l`, workspace)
     console.log('does branch exist?', branchExists)
     if (!branchExists) {
       console.log('Deployment branch does not exist. Creating....')
@@ -62,7 +62,7 @@ export async function deploy() {
 
     if (action.cname) {
       console.log(`Generating a CNAME file in the ${build} directory...`);
-      await execute(`printf "${action.cname}" > CNAME`, build);
+      await execute(`echo "${action.cname}" >CNAME`, build);
     }
 
     await cp(`${build}/.`, temporaryDeploymentDirectory, {recursive: true, force: true});
