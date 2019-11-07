@@ -67,7 +67,7 @@ export async function deploy() {
     /*
       Pushes all of the build files into the deployment directory.
       Allows the user to specify the root if '.' is provided. */
-    await cp(`${build}/.`, temporaryDeploymentDirectory, {recursive: true, force: true});
+    await cp(build === '.' ? build : `${build}/.`, temporaryDeploymentDirectory, {recursive: true, force: true});
 
     // Commits to GitHub.
     await execute(`git add --all .`, temporaryDeploymentDirectory)
