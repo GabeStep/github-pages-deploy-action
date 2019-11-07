@@ -70,7 +70,7 @@ export async function deploy() {
 
     if (action.cname) {
       console.log(`Generating a CNAME file in the ${build} directory...`);
-      await execute(`echo "${action.cname}" > CNAME`, build);
+      await execute(`touch CNAME`, build);
       console.log('contents', await execute(`ls`, build))
     }
 
