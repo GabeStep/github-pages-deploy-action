@@ -71,7 +71,7 @@ export async function deploy() {
     if (action.cname) {
       console.log(`Generating a CNAME file in the ${build} directory...`);
       await execute(`touch CNAME`, build);
-      console.log('contents', await execute(`ls`, build))
+      await execute(`printf ${action.cname} > CNAME`, build)
     }
 
     await cp(`${build}/.`, temporaryDeploymentDirectory, {recursive: true, force: true});
