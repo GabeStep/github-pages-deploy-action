@@ -5,7 +5,6 @@ import { workspace, build, action, repositoryPath } from './constants';
 
 export async function init() {
   try {
-
     const accessToken = core.getInput("ACCESS_TOKEN");
     const gitHubToken = core.getInput("GITHUB_TOKEN");
   
@@ -21,7 +20,6 @@ export async function init() {
       );
     }
   
-    console.log('Starting repo init...')
     await execute(`git init`, workspace);
     await execute(`git config user.name ${action.pusher.name}`, workspace);
     await execute(`git config user.email ${action.pusher.email}`, workspace);
@@ -31,8 +29,9 @@ export async function init() {
   }
 }
 
-export async function generateBranch(action, repositoryPath) {
+export async function generateBranch() {
   try {
+    // Creates a new branch if it doesn't exist on the remote.
     console.log(`Creating ${action.branch} branch...`)
     await execute(`git checkout ${action.baseBranch || "master"}`, workspace);
     await execute(`git checkout --orphan ${action.branch}`, workspace);
@@ -47,29 +46,32 @@ export async function generateBranch(action, repositoryPath) {
 }
 
 export async function deploy() {
-    const temporaryDeploymentDirectory = 'tmp-deployment-folder';
-    const temporaryDeploymentBranch = 'tmp-deployment-branch';
+    const temporaryDeploymentDirectory = 'temp-deployment-folder';
+    const temporaryDeploymentBranch = 'temp-deployment-branch';
+
+    /*
+      Checks to see if the remote exists prior to deploying.
+      If the branch doesn't exist it gets created here as an orphan.
+    */
     const branchExists = await execute(`git ls-remote --heads ${repositoryPath} ${action.branch} | wc -l`, workspace)
-    console.log('does branch exist?', branchExists)
     if (!branchExists) {
       console.log('Deployment branch does not exist. Creating....')
-      await generateBranch(action, repositoryPath);
+      await generateBranch();
     }
   
+    // Checks out the base branch to begin the deployment process.
     await execute(`git checkout ${action.baseBranch || 'master'}`, workspace)
     await execute(`git fetch origin`, workspace);
     await execute(`git worktree add --checkout ${temporaryDeploymentDirectory} origin/${action.branch}`, workspace);
 
-    if (action.cname) {
-      console.log(`Generating a CNAME file in the ${build} directory...`);
-      await execute(`echo "${action.cname}" >CNAME`, build);
-    }
-
+    /*
+      Pushes all of the build files into the deployment directory.
+      Allows the user to specify the root if '.' is provided. */
     await cp(`${build}/.`, temporaryDeploymentDirectory, {recursive: true, force: true});
-    await execute(`git add --all .`, temporaryDeploymentDirectory)
 
+    // Commits to GitHub.
+    await execute(`git add --all .`, temporaryDeploymentDirectory)
     await execute(`git checkout -b ${temporaryDeploymentBranch}`, temporaryDeploymentDirectory);
-    await execute(`git status`, workspace)
     await execute(`git commit -m "Deploying to ${action.branch} from ${action.baseBranch} ${process.env.GITHUB_SHA}" --quiet`, temporaryDeploymentDirectory);
     await execute(`git push ${repositoryPath} ${temporaryDeploymentBranch}:${action.branch}`, temporaryDeploymentDirectory)
 }
