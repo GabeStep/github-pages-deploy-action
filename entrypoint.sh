@@ -14,21 +14,11 @@ then
   exit 1
 fi
 
-if [ -z "$FOLDER" ]
-then
-  echo "You must provide the action with the folder name in the repository where your compiled page lives."
-  exit 1
-fi
-
-case "$FOLDER" in /*|./*)
-  echo "The deployment folder cannot be prefixed with '/' or './'. Instead reference the folder name directly."
-  exit 1
-esac
-
 # Installs Git and jq.
 apt-get update && \
 apt-get install -y git && \
 apt-get install -y jq && \
+npm install -g ngh
 
 # Gets the commit email/name if it exists in the push event payload.
 COMMIT_EMAIL=`jq '.pusher.email' ${GITHUB_EVENT_PATH}`
@@ -87,6 +77,7 @@ echo "Deploying to GitHub..." && \
 git add -f $FOLDER && \
 
 git commit -m "Deploying to ${BRANCH} from ${BASE_BRANCH:-master} ${GITHUB_SHA}" --quiet && \
-git push $REPOSITORY_PATH `git subtree split --prefix $FOLDER ${BASE_BRANCH:-master}`:$BRANCH --force && \
+# git push $REPOSITORY_PATH `git subtree split --prefix $FOLDER ${BASE_BRANCH:-master}`:$BRANCH --force && \
+ngh --dir dist/LaVieSucree
 
 echo "Deployment succesful!"
