@@ -18,7 +18,7 @@ fi
 apt-get update && \
 apt-get install -y git && \
 apt-get install -y jq && \
-npm install -g ngh
+npm install -g angular-cli-ghpages
 
 # Gets the commit email/name if it exists in the push event payload.
 COMMIT_EMAIL=`jq '.pusher.email' ${GITHUB_EVENT_PATH}`
@@ -61,7 +61,7 @@ then
 fi
 
 # Checks out the base branch to begin the deploy process.
-git checkout "${BASE_BRANCH:-master}" && \
+#git checkout "${BASE_BRANCH:-master}" && \
 
 # Builds the project if a build script is provided.
 echo "Running build scripts... $BUILD_SCRIPT" && \
@@ -74,10 +74,10 @@ fi
 
 # Commits the data to Github.
 echo "Deploying to GitHub..." && \
-git add -f $FOLDER && \
+#git add -f $FOLDER && \
 
 git commit -m "Deploying to ${BRANCH} from ${BASE_BRANCH:-master} ${GITHUB_SHA}" --quiet && \
 # git push $REPOSITORY_PATH `git subtree split --prefix $FOLDER ${BASE_BRANCH:-master}`:$BRANCH --force && \
-ngh --dir dist/LaVieSucree
+ngh --dir=dist/LaVieSucree
 
 echo "Deployment succesful!"
